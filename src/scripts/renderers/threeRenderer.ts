@@ -116,6 +116,13 @@ export default class ThreeRenderer implements BaseRenderer{
         // ADD ITEMS HERE
 
         this.bgUniforms = {
+            delta: {
+                value: 0
+            },
+            resolution: {
+                type: 'v2',
+                value: new THREE.Vector2(this.width, this.height)
+            },
             downX: {
                 value: 0
             },
@@ -126,7 +133,7 @@ export default class ThreeRenderer implements BaseRenderer{
                 value: 0
             },
             toY: {
-                value: 0
+                value: 3
             },
             oX: {
                 value: 0
@@ -142,39 +149,49 @@ export default class ThreeRenderer implements BaseRenderer{
             }
         };
 
-        let bgGeometry = new THREE.PlaneGeometry(10, 10, 400, 200);
+        let bgGeometry = new THREE.PlaneGeometry(10, 10, 30, 30);
         
         this.bgMaterial = new THREE.ShaderMaterial({
             uniforms: this.bgUniforms,
             vertexShader: clothVertShader, 
             fragmentShader: clothFragShader,
             transparent: true,
-           // blending: THREE.AdditiveBlending
+            blending: THREE.AdditiveBlending,
+            //side: THREE.DoubleSide
         }); 
               
         //let bgMaterial = new THREE.MeshLambertMaterial({color: 0x00ff00});
         this.bg = new THREE.Mesh( bgGeometry, this.bgMaterial );
-        this.bg.position.set(0, 0, -10);
-        this.bg.rotation.z = Math.PI;
+        this.bg.position.set(0, 0, -7);
+        //this.bg.rotation.z = Math.PI;
         this.scene.add(this.bg);
+
+        setInterval(() => {
+            this.bgMaterial.uniforms.delta.value += 0.1;
+            //this.bg.rotation.y += 0.1;
+        }, 100);
 
         // END ADD ITEMS
 
         this.createTimeline();
 
-        window.addEventListener('mousedown', (e) => {
+        this.canvas.addEventListener('mousedown', (e) => {
+
+            console.log( e.x, this.width, e.x / this.width);
             let uniforms = this.bgMaterial.uniforms;
-            uniforms.downX.value = uniforms.toX.value = e.x / window.innerWidth;
-            uniforms.downY.value = uniforms.toY.value = e.y / window.innerHeight;
+            uniforms.downX.value = uniforms.toX.value = e.x / this.width;
+            uniforms.downY.value = uniforms.toY.value = e.y / this.height;
             this.update();
             this.dragging = true;
         });
 
-        window.addEventListener('mousemove', (e) => {
+        this.canvas.addEventListener('mousemove', (e) => {
             if (this.dragging) {
+                console.log( e.x, this.width, e.x / this.width);
+
                 let uniforms = this.bgMaterial.uniforms;
-                uniforms.toX.value = e.x / window.innerWidth;
-                uniforms.toY.value = e.y / window.innerHeight;
+                uniforms.toX.value = e.x / this.width;
+                uniforms.toY.value = e.y / this.height;
                 this.update();
             }
         });
@@ -183,13 +200,14 @@ export default class ThreeRenderer implements BaseRenderer{
             this.dragging = false;
             let uniforms = this.bgMaterial.uniforms;
 
-            gsap.to(uniforms.toY, {value: 0, duration: 1});
+            gsap.to(uniforms.toY, {value: -.1, duration: 1});
             gsap.to(uniforms.downY, {value: 1, duration: 1});
 
         });
     }
 
     private update() {
+        
         let params = this.bgMaterial.uniforms;
         params.vX.value += (params.toX.value - params.oX.value);
         params.oX.value = (params.oX.value + params.vX.value) * .4;
