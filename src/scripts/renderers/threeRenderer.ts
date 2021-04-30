@@ -175,7 +175,7 @@ export default class ThreeRenderer implements BaseRenderer{
 
         this.createTimeline();
 
-        this.canvas.addEventListener('mousedown', (e) => {
+        window.addEventListener('mousedown', (e) => {
 
             console.log( e.x, this.width, e.x / this.width);
             let uniforms = this.bgMaterial.uniforms;
@@ -185,9 +185,9 @@ export default class ThreeRenderer implements BaseRenderer{
             this.dragging = true;
         });
 
-        this.canvas.addEventListener('mousemove', (e) => {
+        window.addEventListener('mousemove', (e) => {
             if (this.dragging) {
-                console.log( e.x, this.width, e.x / this.width);
+                console.log(e);
 
                 let uniforms = this.bgMaterial.uniforms;
                 uniforms.toX.value = e.x / this.width;
@@ -216,7 +216,15 @@ export default class ThreeRenderer implements BaseRenderer{
     }
 
     private createTimeline() {
+        let tl = gsap.timeline({
+            repeat: -1
+        });
 
+        let uniforms = this.bgMaterial.uniforms;
+        tl.to(uniforms.toX, {value: 0, duration: 0.5}, 0);
+        tl.to(uniforms.toX, {value: 1, duration: 1}, 1);
+        tl.to(uniforms.toY, {value: -.1, duration: 1}, 0.5);
+        tl.to(uniforms.downY, {value: 1, duration: 1}, 0.5);
     }
 
     private handleRepeat() {
