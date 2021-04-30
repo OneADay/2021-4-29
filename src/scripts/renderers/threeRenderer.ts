@@ -216,8 +216,9 @@ export default class ThreeRenderer implements BaseRenderer{
     }
 
     private createTimeline() {
-        let tl = gsap.timeline({
-            repeat: -1
+        tl = gsap.timeline({
+            repeat: -1,
+            onRepeat: () => this.handleRepeat()
         });
 
         let uniforms = this.bgMaterial.uniforms;
